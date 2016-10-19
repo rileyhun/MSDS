@@ -418,9 +418,3 @@ def get_siteinfo():
             list_links1.click()
 
             browser.back()
-
-
-# MSDS_SearchByCAS()
-MSDS_SearchBySDSNumber()
-# get_siteinfo()
-
