@@ -7,10 +7,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from datetime import datetime
+import re
+import numpy as np
 
-
-Analyzers = ["Advia 1200", "Digene HPV", "DSRi", "Immulite", "ImmunoCap 250",
-                 "Liasion", "Ortho Provue", "PrepStain", "Variant II"]
+Analyzers = ["ACL Top", "ACL Advance", "Advia 1200", "Advia 2400",
+             "Bioplex 2200", "Advia Centaur", "Clinitek Atlas", "Cobas 800 Integra",
+             "Digene HPV", "DSRi", "Immulite", "ImmunoCap 250",
+                 "Liasion", "Ortho Provue", "PrepStain", "Variant II", "Sebia electrophoresis"]
 Analyzers = [("Instrument/Analyzer", x) for x in Analyzers]
 
 def MSDS_SearchByAnalyzer(Analyzers):
@@ -98,7 +101,7 @@ def MSDS_SearchByAnalyzer(Analyzers):
                     else:
                         for row in rows[1:]:
                             cols = row.find_all('td')
-                            cols = [ele.text.strip() for ele in cols]
+                            cols = [ele.text for ele in cols]
                             Ingredients.append([ele for ele in cols if ele])
 
                     # Go to next page of Ingredients section if applicable
@@ -118,11 +121,13 @@ def MSDS_SearchByAnalyzer(Analyzers):
                     item.insert(4, LL_Number)
 
                 # Convert to DataFrame and Export
-
                 data = pd.DataFrame(Ingredients)
 
-                if i == 0 and j==0:
-                    data.to_csv("MSDS Inventory Results "+"{:%B %d, %Y}".format(datetime.now())+".csv", mode='a', index=False)
+                if i == 0 and record_page==0 and j==0:
+                    data.to_csv("MSDS Inventory Results "+"{:%B %d, %Y}".format(datetime.now())+".csv", mode='a',
+                                header=["Analyzer Name", "Product Name", "Manufacturer", "SDS-Number",
+                                                        "LL Number", "Chemical Component", "CAS Number", "% Context",
+                                                        "Min %", "Max %", "Avg %", "% Range", "SARA 313 %"],index=False)
                 else:
                     data.to_csv("MSDS Inventory Results "+"{:%B %d, %Y}".format(datetime.now())+".csv", mode='a',
                                 header=False, index=False)
@@ -138,5 +143,3 @@ def MSDS_SearchByAnalyzer(Analyzers):
             page_number+=1
 
         browser.get(url)
-
-MSDS_SearchByAnalyzer(Analyzers)
